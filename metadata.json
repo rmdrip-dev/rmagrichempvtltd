@@ -1,0 +1,7 @@
+{
+  "name": "Semi-Ecommerce Landing Page",
+  "description": "RM Agrichem website",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
