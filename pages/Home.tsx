@@ -27,7 +27,7 @@ export const Home: React.FC = () => {
               <span className="text-brand-100 font-medium tracking-wide text-sm uppercase">Pioneering Sustainable Agriculture</span>
             </div>
             <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6">
-              Cultivating the <br />
+              Nurturing Growth, Empowering Farmers<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-green-200">Future of Farming</span>
             </h1>
             <p className="text-lg text-gray-200 mb-8 leading-relaxed max-w-xl">

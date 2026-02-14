@@ -10,20 +10,21 @@ interface StoreContextType {
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   isAdmin: boolean;
-  loginAdmin: () => void;
-  logoutAdmin: () => void;
-  addProduct: (product: Product) => void;
-  updateProduct: (product: Product) => void;
-  deleteProduct: (id: string) => void;
+  isLoading: boolean;
+  loginAdmin: (email: string, password: string) => Promise<{ error: any }>;
+  logoutAdmin: () => Promise<void>;
+  addProduct: (product: Omit<Product, 'id'>, imageFile?: File) => Promise<{ error: any }>;
+  updateProduct: (product: Product, imageFile?: File) => Promise<{ error: any }>;
+  deleteProduct: (id: string, imageUrl: string) => Promise<{ error: any }>;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Simulating database with local state for the demo
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Cart Logic
   const addToCart = (product: Product) => {
@@ -51,22 +52,57 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const clearCart = () => setCart([]);
 
-  // Admin Logic
-  const loginAdmin = () => setIsAdmin(true);
-  const logoutAdmin = () => setIsAdmin(false);
-
-  const addProduct = (product: Product) => {
-    setProducts((prev) => [product, ...prev]);
+  // Mock Auth Logic
+  const loginAdmin = async (email: string, password: string) => {
+    // Simple mock authentication
+    if (email === 'admin@rmagrichem.com' && password === 'admin') {
+      setIsAdmin(true);
+      return { error: null };
+    }
+    return { error: { message: 'Invalid credentials. Try admin@rmagrichem.com / admin' } };
   };
 
-  const updateProduct = (updatedProduct: Product) => {
-    setProducts((prev) =>
-      prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
-    );
+  const logoutAdmin = async () => {
+    setIsAdmin(false);
   };
 
-  const deleteProduct = (id: string) => {
-    setProducts((prev) => prev.filter((p) => p.id !== id));
+  // Mock CRUD Logic
+  const addProduct = async (product: Omit<Product, 'id'>, imageFile?: File) => {
+    setIsLoading(true);
+    let imageUrl = product.image;
+
+    // Simulate image upload by creating a local object URL if a file is provided
+    if (imageFile) {
+      imageUrl = URL.createObjectURL(imageFile);
+    }
+
+    const newProduct: Product = {
+      ...product,
+      id: Date.now().toString(),
+      image: imageUrl
+    };
+
+    setProducts(prev => [newProduct, ...prev]);
+    setIsLoading(false);
+    return { error: null };
+  };
+
+  const updateProduct = async (product: Product, imageFile?: File) => {
+    setIsLoading(true);
+    let imageUrl = product.image;
+
+    if (imageFile) {
+      imageUrl = URL.createObjectURL(imageFile);
+    }
+
+    setProducts(prev => prev.map(p => p.id === product.id ? { ...product, image: imageUrl } : p));
+    setIsLoading(false);
+    return { error: null };
+  };
+
+  const deleteProduct = async (id: string, imageUrl: string) => {
+    setProducts(prev => prev.filter(p => p.id !== id));
+    return { error: null };
   };
 
   return (
@@ -79,6 +115,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         updateQuantity,
         clearCart,
         isAdmin,
+        isLoading,
         loginAdmin,
         logoutAdmin,
         addProduct,
